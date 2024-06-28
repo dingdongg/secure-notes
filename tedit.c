@@ -17,8 +17,14 @@ void enableRawMode() {
     // variable to hold terminal attributes
     struct termios raw = og_termios;
 
-    // disable the echo functionality (+ canonical mode)
-    raw.c_lflag = raw.c_lflag & ~(ECHO | ICANON);
+    // disable transmission of "Ctrl+S" and "Ctrl+Q" (software flow control)
+    // ICRNL disables translating '\r' into '\n'
+    raw.c_iflag = raw.c_iflag & ~(ICRNL | IXON);
+    // disable the canonical mode + transmission of several control characters:
+    // - IEXTEN: Ctrl+V, which sends the next character literally
+    //      - MacOS: Ctrl+O too, which discards that control character
+    // - ISIG  : Ctrl+C/Ctrl+Z, which causes program to exit/suspend
+    raw.c_lflag = raw.c_lflag & ~(ECHO | ICANON | IEXTEN | ISIG);
 
     // update terminal attributes
     tcsetattr(STDIN_FILENO, TCSAFLUSH, &raw);

@@ -5,12 +5,18 @@
 #include <unistd.h>
 #include <stdlib.h>
 
+// DEFINES //
+
 // Ctrl key macro; sets upper 3 bits to 0
 // Ctrl key strips bits 5 and 6 from `key` and sends that 
 // ex) Ctrl+A: A is 0x1100001; A & 0x1F yields 0x1
 #define CTRL_KEY(key) ((key) & 0x1F)
 
+// DATA //
+
 struct termios og_termios;
+
+// TERMINAL //
 
 void die(const char* s) {
     perror(s);
@@ -60,22 +66,42 @@ void enableRawMode() {
     if (tcsetattr(STDIN_FILENO, TCSAFLUSH, &raw) == -1) die("tcsetattr");
 }
 
-int main() {
+/**
+ * wait for keypress and return it
+ */
+char editorReadKey() {
+    int nread;
+    char c;
+    while ((nread = read(STDIN_FILENO, &c, 1)) != 1) {
+        // errno is a global variable set by most C library functions when they fail
+        if (nread == -1 && errno != EAGAIN) die("read");
+    }
+    return c;
+}
 
+// INPUT //
+
+/**
+ * waits for a keypress and then handles it accordingly
+ * ex) Ctrl+Q exits the program
+ */
+void editorProcessKeypress() {
+    char c = editorReadKey();
+
+    switch (c) {
+        case CTRL_KEY('q'):
+            exit(0);
+            break;
+    }
+}
+
+// INIT //
+
+int main() {
     enableRawMode();
 
     while (1) {
-        char c = '\0';
-        // print ascii code only if it's a control character (ie. non-printable)
-        // errno is a global variable set by most C library functions when they fail
-        if (read(STDIN_FILENO, &c , 1) == -1 && errno != EAGAIN) die("read");
-        if (iscntrl(c)) {
-            printf("%d\r\n", c);
-        } else {
-            printf("%d ('%c')\r\n", c, c);
-        }
-
-        if (c == CTRL_KEY('q')) break;
+        editorProcessKeypress();
     }
 
     return 0;

@@ -7,15 +7,27 @@ import (
 	"strings"
 )
 
+// create a new note, and prompt user to start writing note contents
+// once finished (how to determine this? specific delimiter?), 
+// encrypt file contents and save.
 func createNote(name string) {
 	fmt.Println("creating note ", name)
 }
+
+// locate file by name, and delete it
 func deleteNote(name string) {
 	fmt.Println("deleting note ", name)
 }
+
+// locate file by name. Decrypt its contents,
+// load it up to display to user, and allow them to modify.
+// once finished, encrypt file contents and save.
 func editNote(name string) {
 	fmt.Println("editing note ", name)
 }
+
+// locate file by name. Decrypt its contents,
+// and load it up to display to user.
 func viewNote(name string) {
 	fmt.Println("viewing note ", name)
 }

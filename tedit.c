@@ -149,8 +149,14 @@ void editorProcessKeypress() {
 
 // INIT //
 
+void initEditor() {
+    // get terminal's current dimensions
+    if (getWindowSize(&E.screenRows, &E.screenCols) == -1) die("getWindowSize");
+}
+
 int main() {
     enableRawMode();
+    initEditor();
 
     while (1) {
         editorRefreshScreen();

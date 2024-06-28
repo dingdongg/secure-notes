@@ -26,6 +26,7 @@ void enableRawMode() {
     // - ISIG  : Ctrl+C/Ctrl+Z, which causes program to exit/suspend
     raw.c_lflag = raw.c_lflag & ~(ECHO | ICANON | IEXTEN | ISIG);
 
+    // turn off the translation from '\n' to '\r\n'
     raw.c_oflag = raw.c_oflag & ~(OPOST);
 
     // update terminal attributes

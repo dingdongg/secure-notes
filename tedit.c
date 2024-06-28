@@ -1,3 +1,4 @@
+#include <errno.h>
 #include <ctype.h>
 #include <stdio.h>
 #include <termios.h>
@@ -6,12 +7,19 @@
 
 struct termios og_termios;
 
+void die(const char* s) {
+    perror(s);
+    exit(1);
+}
+
 void disableRawmode() {
-    tcsetattr(STDIN_FILENO, TCSAFLUSH, &og_termios);
+    if (tcsetattr(STDIN_FILENO, TCSAFLUSH, &og_termios) == -1) {
+        die("tcsetattr");
+    }
 }
 
 void enableRawMode() {
-    tcgetattr(STDIN_FILENO, &og_termios);
+    if (tcgetattr(STDIN_FILENO, &og_termios) == -1) die("tcgetattr");
     atexit(disableRawmode); // revert to original terminal settings after program exits
 
     // variable to hold terminal attributes
@@ -44,18 +52,18 @@ void enableRawMode() {
     raw.c_cc[VTIME] = 10;
 
     // update terminal attributes
-    tcsetattr(STDIN_FILENO, TCSAFLUSH, &raw);
+    if (tcsetattr(STDIN_FILENO, TCSAFLUSH, &raw) == -1) die("tcsetattr");
 }
 
 int main() {
 
     enableRawMode();
 
-    char c;
     while (1) {
         char c = '\0';
         // print ascii code only if it's a control character (ie. non-printable)
-        read(STDIN_FILENO, &c , 1);
+        // errno is a global variable set by most C library functions when they fail
+        if (read(STDIN_FILENO, &c , 1) == -1 && errno != EAGAIN) die("read");
         if (iscntrl(c)) {
             printf("%d\r\n", c);
         } else {

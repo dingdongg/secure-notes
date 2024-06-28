@@ -82,6 +82,9 @@ char editorReadKey() {
 // OUTPUT //
 
 void editorRefreshScreen() {
+    // write escape sequence to the terminal
+    // - escape sequences are used to instruct terminal to do text formatting tasks
+    //   like coloring text, moving cursor, clearing screen
     write(STDOUT_FILENO, "\x1b[2J", 4);
 }
 

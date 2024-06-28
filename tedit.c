@@ -19,12 +19,20 @@ void enableRawMode() {
 
     // disable transmission of "Ctrl+S" and "Ctrl+Q" (software flow control)
     // ICRNL disables translating '\r' into '\n'
-    raw.c_iflag = raw.c_iflag & ~(ICRNL | IXON);
+    // optional flags below don't rly apply to modern terminals,
+    // but are still disabled for the sake of convention
+    // BRKINT (optional): sent SIGINT to process
+    // INPCK (optional): parity checking
+    // ISTRIP (optional): set 8th bit to 0, probs already turned off
+    raw.c_iflag = raw.c_iflag & ~(ICRNL | IXON | BRKINT | INPCK | ISTRIP);
     // disable the canonical mode + transmission of several control characters:
     // - IEXTEN: Ctrl+V, which sends the next character literally
     //      - MacOS: Ctrl+O too, which discards that control character
     // - ISIG  : Ctrl+C/Ctrl+Z, which causes program to exit/suspend
     raw.c_lflag = raw.c_lflag & ~(ECHO | ICANON | IEXTEN | ISIG);
+
+    // set character size to 8 bits
+    raw.c_cflag = raw.c_cflag | (CS8);
 
     // turn off the translation from '\n' to '\r\n'
     raw.c_oflag = raw.c_oflag & ~(OPOST);

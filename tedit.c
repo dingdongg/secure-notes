@@ -5,6 +5,11 @@
 #include <unistd.h>
 #include <stdlib.h>
 
+// Ctrl key macro; sets upper 3 bits to 0
+// Ctrl key strips bits 5 and 6 from `key` and sends that 
+// ex) Ctrl+A: A is 0x1100001; A & 0x1F yields 0x1
+#define CTRL_KEY(key) ((key) & 0x1F)
+
 struct termios og_termios;
 
 void die(const char* s) {
@@ -70,7 +75,7 @@ int main() {
             printf("%d ('%c')\r\n", c, c);
         }
 
-        if (c == 'q') break;
+        if (c == CTRL_KEY('q')) break;
     }
 
     return 0;

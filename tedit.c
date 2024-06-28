@@ -84,6 +84,16 @@ char editorReadKey() {
 
 // OUTPUT //
 
+/**
+ * draw each row of text file being edited
+ */
+void editorDrawRows() {
+    int y;
+    for (y = 0; y < 24; y++) {
+        write(STDOUT_FILENO, "~\r\n", 3);
+    }
+}
+
 void editorRefreshScreen() {
     // write escape sequence to the terminal
     // - escape sequences are used to instruct terminal to do text formatting tasks
@@ -92,6 +102,11 @@ void editorRefreshScreen() {
     write(STDOUT_FILENO, "\x1b[2J", 4);
 
     // reset cursor to top left of terminal
+    write(STDOUT_FILENO, "\x1b[H", 3);
+
+    editorDrawRows();
+
+    // re-position cusor after rendering rows
     write(STDOUT_FILENO, "\x1b[H", 3);
 }
 

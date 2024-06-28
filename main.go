@@ -11,6 +11,7 @@ import (
 // once finished (how to determine this? specific delimiter?), 
 // encrypt file contents and save.
 func createNote(name string) {
+	// need a text editor functionality
 	fmt.Println("creating note ", name)
 }
 

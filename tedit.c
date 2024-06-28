@@ -19,6 +19,9 @@ struct termios og_termios;
 // TERMINAL //
 
 void die(const char* s) {
+    write(STDOUT_FILENO, "\x1b[2J", 4);
+    write(STDOUT_FILENO, "\x1b[H", 3);
+
     perror(s);
     exit(1);
 }
@@ -85,7 +88,11 @@ void editorRefreshScreen() {
     // write escape sequence to the terminal
     // - escape sequences are used to instruct terminal to do text formatting tasks
     //   like coloring text, moving cursor, clearing screen
+    // comprehensive VT100 escape sequence docs: https://vt100.net/docs/vt100-ug/chapter3.html
     write(STDOUT_FILENO, "\x1b[2J", 4);
+
+    // reset cursor to top left of terminal
+    write(STDOUT_FILENO, "\x1b[H", 3);
 }
 
 // INPUT //

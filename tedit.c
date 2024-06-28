@@ -37,6 +37,12 @@ void enableRawMode() {
     // turn off the translation from '\n' to '\r\n'
     raw.c_oflag = raw.c_oflag & ~(OPOST);
 
+    // # of bytes to required before read() returns
+    raw.c_cc[VMIN] = 0;
+
+    // # max amount of time to wait before read() returns (in 100ms)
+    raw.c_cc[VTIME] = 10;
+
     // update terminal attributes
     tcsetattr(STDIN_FILENO, TCSAFLUSH, &raw);
 }
@@ -46,13 +52,17 @@ int main() {
     enableRawMode();
 
     char c;
-    while (read(STDIN_FILENO, &c, 1) == 1 && c != 'q') {
+    while (1) {
+        char c = '\0';
         // print ascii code only if it's a control character (ie. non-printable)
+        read(STDIN_FILENO, &c , 1);
         if (iscntrl(c)) {
             printf("%d\r\n", c);
         } else {
             printf("%d ('%c')\r\n", c, c);
         }
+
+        if (c == 'q') break;
     }
 
     return 0;

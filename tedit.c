@@ -14,7 +14,11 @@
 
 // DATA //
 
-struct termios og_termios;
+struct editorConfig {
+    struct termios og_termios;
+};
+
+struct editorConfig E;
 
 // TERMINAL //
 
@@ -27,17 +31,17 @@ void die(const char* s) {
 }
 
 void disableRawmode() {
-    if (tcsetattr(STDIN_FILENO, TCSAFLUSH, &og_termios) == -1) {
+    if (tcsetattr(STDIN_FILENO, TCSAFLUSH, &E.og_termios) == -1) {
         die("tcsetattr");
     }
 }
 
 void enableRawMode() {
-    if (tcgetattr(STDIN_FILENO, &og_termios) == -1) die("tcgetattr");
+    if (tcgetattr(STDIN_FILENO, &E.og_termios) == -1) die("tcgetattr");
     atexit(disableRawmode); // revert to original terminal settings after program exits
 
     // variable to hold terminal attributes
-    struct termios raw = og_termios;
+    struct termios raw = E.og_termios;
 
     // disable transmission of "Ctrl+S" and "Ctrl+Q" (software flow control)
     // ICRNL disables translating '\r' into '\n'

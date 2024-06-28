@@ -1,24 +1,30 @@
 #include <stdio.h>
 #include <termios.h>
 #include <unistd.h>
+#include <stdlib.h>
+
+struct termios og_termios;
+
+void disableRawmode() {
+    tcsetattr(STDIN_FILENO, TCSAFLUSH, &og_termios);
+}
 
 void enableRawMode() {
-    // variable to hold terminal attributes
-    struct termios raw;
-    
-    // get terminal attributes
-    tcgetattr(STDIN_FILENO, &raw);
+    tcgetattr(STDIN_FILENO, &og_termios);
+    atexit(disableRawmode); // revert to original terminal settings after program exits
 
-    // disable the echo functionality
-    // on by default in canonical mode
-    // echo just prints user input to stdout
-    raw.c_lflag = raw.c_lflag & ~(ECHO);
+    // variable to hold terminal attributes
+    struct termios raw = og_termios;
+
+    // disable the echo functionality (+ canonical mode)
+    raw.c_lflag = raw.c_lflag & ~(ECHO | ICANON);
 
     // update terminal attributes
     tcsetattr(STDIN_FILENO, TCSAFLUSH, &raw);
 }
 
 int main() {
+
     enableRawMode();
 
     char c;

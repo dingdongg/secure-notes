@@ -16,6 +16,13 @@
 // ex) Ctrl+A: A is 0x1100001; A & 0x1F yields 0x1
 #define CTRL_KEY(key) ((key) & 0x1F)
 
+enum editorKey {
+    ARROW_LEFT = 'a',
+    ARROW_RIGHT = 'd',
+    ARROW_UP = 'w',
+    ARROW_DOWN = 's',
+};
+
 // DATA //
 
 struct editorConfig {
@@ -93,17 +100,17 @@ char editorReadKey() {
 
     // map arrow keys to cursor movement
     if (c == '\x1b') {
-        char seq[3];
+        char seq[3]; // length is 3 to handle longer escape sequences in the future
 
         if (read(STDIN_FILENO, &seq[0], 1) != 1) return '\x1b';
         if (read(STDIN_FILENO, &seq[1], 1) != 1) return '\x1b';
 
         if (seq[0] == '[') {
             switch (seq[1]) {
-                case 'A': return 'w';
-                case 'B': return 's';
-                case 'C': return 'd';
-                case 'D': return 'a';
+                case 'A': return ARROW_UP;
+                case 'B': return ARROW_DOWN;
+                case 'C': return ARROW_RIGHT;
+                case 'D': return ARROW_LEFT;
             }
         }
 
@@ -246,16 +253,16 @@ void editorRefreshScreen() {
 
 void editorMoveCursor(char key) {
     switch (key) {
-        case 'a':
+        case ARROW_LEFT:
             E.cx--;
             break;
-        case 'd':
+        case ARROW_RIGHT:
             E.cx++;
             break;
-        case 'w':
+        case ARROW_UP:
             E.cy--;
             break;
-        case 's':
+        case ARROW_DOWN:
             E.cy++;
             break;
     }
@@ -274,10 +281,10 @@ void editorProcessKeypress() {
             write(STDOUT_FILENO, "\x1b[H", 3);
             exit(0);
             break;
-        case 'w':
-        case 'a':
-        case 's':
-        case 'd':
+        case ARROW_DOWN:
+        case ARROW_UP:
+        case ARROW_LEFT:
+        case ARROW_RIGHT:
             editorMoveCursor(c);
             break;
     }

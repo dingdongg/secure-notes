@@ -19,6 +19,7 @@
 // DATA //
 
 struct editorConfig {
+    int cx, cy;
     int screenRows;
     int screenCols;
     struct termios og_termios;
@@ -210,7 +211,10 @@ void editorRefreshScreen() {
     editorDrawRows(&ab);
 
     // re-position cusor after rendering rows
-    abufAppend(&ab, "\x1b[H", 3);
+    char buf[32];
+    snprintf(buf, sizeof(buf), "\x1b[%d;%dH", E.cy + 1, E.cx + 1); // cursor pos is 1-indexed
+    abufAppend(&ab, buf, strlen(buf));
+
     // show cursor after refresh is complete
     abufAppend(&ab, "\x1b[?25h", 6);
 
@@ -240,6 +244,8 @@ void editorProcessKeypress() {
 // INIT //
 
 void initEditor() {
+    E.cx = 0;
+    E.cy = 0;
     // get terminal's current dimensions
     if (getWindowSize(&E.screenRows, &E.screenCols) == -1) die("getWindowSize");
 }

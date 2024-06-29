@@ -162,6 +162,8 @@ void editorDrawRows(struct appendBuffer *ab) {
     for (y = 0; y < E.screenRows; y++) {
         abufAppend(ab, "~", 1);
 
+        // erase line to the right of the cursor
+        abufAppend(ab, "\x1b[K", 3);
         if (y < E.screenRows - 1) {
             abufAppend(ab, "\r\n", 2);
         }
@@ -170,14 +172,13 @@ void editorDrawRows(struct appendBuffer *ab) {
 
 void editorRefreshScreen() {
     struct appendBuffer ab = ABUF_INIT;
-
-    // hide cursor in case cursor is displayed in the middle of screen while drawing to screen
-    abufAppend(&ab, "\x1b[?25l", 6);
     // write escape sequence to the terminal
     // - escape sequences are used to instruct terminal to do text formatting tasks
     //   like coloring text, moving cursor, clearing screen
     // comprehensive VT100 escape sequence docs: https://vt100.net/docs/vt100-ug/chapter3.html
-    abufAppend(&ab, "\x1b[2J", 4);
+
+    // hide cursor in case cursor is displayed in the middle of screen while drawing to screen
+    abufAppend(&ab, "\x1b[?25l", 6);
 
     // reset cursor to top left of terminal
     abufAppend(&ab, "\x1b[H", 3);

@@ -9,6 +9,8 @@
 
 // DEFINES //
 
+#define EDITOR_VER "0.0.1"
+
 // Ctrl key macro; sets upper 3 bits to 0
 // Ctrl key strips bits 5 and 6 from `key` and sends that 
 // ex) Ctrl+A: A is 0x1100001; A & 0x1F yields 0x1
@@ -160,7 +162,29 @@ void abufFree(struct appendBuffer *ab) {
 void editorDrawRows(struct appendBuffer *ab) {
     int y;
     for (y = 0; y < E.screenRows; y++) {
-        abufAppend(ab, "~", 1);
+        // print welcome message on screen
+        if (y == E.screenRows / 3) {
+            char welcome[80];
+            int welcomeLen = snprintf(
+                welcome, 
+                sizeof(welcome), 
+                "EDITOR -- VERSION %s", 
+                EDITOR_VER
+            );
+            // truncate message if longer than terminal width
+            if (welcomeLen > E.screenCols) welcomeLen = E.screenCols;
+
+            // add padding to center the message
+            int padding = (E.screenCols - welcomeLen) / 2;
+            if (padding) {
+                abufAppend(ab, "~", 1);
+                padding--; // to account for the "~" we just added
+            }
+            while (padding--) abufAppend(ab, " ", 1);
+            abufAppend(ab, welcome, welcomeLen);
+        } else {
+            abufAppend(ab, "~", 1);
+        }
 
         // erase line to the right of the cursor
         abufAppend(ab, "\x1b[K", 3);

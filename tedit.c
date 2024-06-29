@@ -170,6 +170,9 @@ void editorDrawRows(struct appendBuffer *ab) {
 
 void editorRefreshScreen() {
     struct appendBuffer ab = ABUF_INIT;
+
+    // hide cursor in case cursor is displayed in the middle of screen while drawing to screen
+    abufAppend(&ab, "\x1b[?25l", 6);
     // write escape sequence to the terminal
     // - escape sequences are used to instruct terminal to do text formatting tasks
     //   like coloring text, moving cursor, clearing screen
@@ -183,6 +186,8 @@ void editorRefreshScreen() {
 
     // re-position cusor after rendering rows
     abufAppend(&ab, "\x1b[H", 3);
+    // show cursor after refresh is complete
+    abufAppend(&ab, "\x1b[?25l", 6);
 
     // flush buffer contents to stdout
     write(STDOUT_FILENO, ab.b, ab.len);

@@ -157,31 +157,36 @@ void abufFree(struct appendBuffer *ab) {
 /**
  * draw each row of text file being edited
  */
-void editorDrawRows() {
+void editorDrawRows(struct appendBuffer *ab) {
     int y;
     for (y = 0; y < E.screenRows; y++) {
-        write(STDOUT_FILENO, "~", 1);
+        abufAppend(ab, "~", 1);
 
         if (y < E.screenRows - 1) {
-            write(STDOUT_FILENO, "\r\n", 2);
+            abufAppend(ab, "\r\n", 2);
         }
     }
 }
 
 void editorRefreshScreen() {
+    struct appendBuffer ab = ABUF_INIT;
     // write escape sequence to the terminal
     // - escape sequences are used to instruct terminal to do text formatting tasks
     //   like coloring text, moving cursor, clearing screen
     // comprehensive VT100 escape sequence docs: https://vt100.net/docs/vt100-ug/chapter3.html
-    write(STDOUT_FILENO, "\x1b[2J", 4);
+    abufAppend(&ab, "\x1b[2J", 4);
 
     // reset cursor to top left of terminal
-    write(STDOUT_FILENO, "\x1b[H", 3);
+    abufAppend(&ab, "\x1b[H", 3);
 
-    editorDrawRows();
+    editorDrawRows(&ab);
 
     // re-position cusor after rendering rows
-    write(STDOUT_FILENO, "\x1b[H", 3);
+    abufAppend(&ab, "\x1b[H", 3);
+
+    // flush buffer contents to stdout
+    write(STDOUT_FILENO, ab.b, ab.len);
+    abufFree(&ab);
 }
 
 // INPUT //

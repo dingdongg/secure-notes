@@ -2,6 +2,7 @@
 #include <ctype.h>
 #include <stdio.h>
 #include <sys/ioctl.h>
+#include <string.h>
 #include <termios.h>
 #include <unistd.h>
 #include <stdlib.h>
@@ -124,6 +125,31 @@ int getWindowSize(int *rows, int *cols) {
     *cols = ws.ws_col;
     *rows = ws.ws_row;
     return 0;
+}
+
+// APPEND BUFFER //
+
+// buffer used to make write() calls more efficient by writing in bulk,
+// rather than numerous small write() calls
+struct appendBuffer {
+    char *b;
+    int len;
+};
+
+#define ABUF_INIT {NULL, 0}
+
+// append `s` of length `len` to existing buffer
+void abufAppend(struct appendBuffer *ab, const char *s, int len) {
+    char *new = realloc(ab->b, ab->len + len);
+
+    if (new == NULL) return;
+    memcpy(&new[ab->len], s, len);
+    ab->b = new;
+    ab->len += len;
+}
+
+void abufFree(struct appendBuffer *ab) {
+    free(ab->b);
 }
 
 // OUTPUT //

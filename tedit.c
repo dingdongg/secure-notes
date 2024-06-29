@@ -187,7 +187,7 @@ void editorRefreshScreen() {
     // re-position cusor after rendering rows
     abufAppend(&ab, "\x1b[H", 3);
     // show cursor after refresh is complete
-    abufAppend(&ab, "\x1b[?25l", 6);
+    abufAppend(&ab, "\x1b[?25h", 6);
 
     // flush buffer contents to stdout
     write(STDOUT_FILENO, ab.b, ab.len);
